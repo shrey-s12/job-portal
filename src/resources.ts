@@ -82,10 +82,10 @@ export const jobByIdResource: ResourceTemplateDefinition = {
 /**
  * Resource Template: Filter Profiles
  */
-export const filterProfilesResource: ResourceTemplateDefinition = {
-    name: "filter_profiles",
+export const filterProfileByNameResource: ResourceTemplateDefinition = {
+    name: "profiles_by_name",
     template: new ResourceTemplate(
-        "profiles://filter{?name,email,phone,location,skills,company,role}",
+        "profiles://name/{name}",
         {
             list: async () => ({
                 resources: profiles.map(p => ({
@@ -98,16 +98,12 @@ export const filterProfilesResource: ResourceTemplateDefinition = {
         }
     ),
     title: "Filter Candidate Profiles",
-    description: "Filter candidate profiles by query parameters. Supports: name, email, phone, location, skills (matches any skill), company (in experience), role (in experience). Use profiles://filter?location=Remote",
+    description: "Filter candidate profiles by name. Use profiles://name/john",
     handler: async (uri, variables) => {
+        console.log("Filter Profiles Handler Invoked with variables and uri:", uri, variables);
+
         const searchParams = new URLSearchParams();
-        if (variables) {
-            for (const [key, value] of Object.entries(variables)) {
-                const val = Array.isArray(value) ? value[0] : value;
-                searchParams.set(key, val);
-            }
-        }
-        
+        searchParams.set('name', variables?.name as string || '');
         const filtered = filterEntities(profiles, searchParams);
         return formatResourceList(uri, filtered);
     }
@@ -153,6 +149,6 @@ export const filterJobsResource: ResourceTemplateDefinition = {
 export const allResources: ResourceTemplateDefinition[] = [
     profileByIdResource,
     jobByIdResource,
-    filterProfilesResource,
+    filterProfileByNameResource,
     filterJobsResource,
 ];

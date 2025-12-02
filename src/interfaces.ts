@@ -54,10 +54,11 @@ export const formatResourceList = (uri: URL, results: any[]) => ({
     contents: [
         {
             uri: String(uri),
-            text: JSON.stringify({ items: results })
+            mimeType: "application/json",
+            text: JSON.stringify(results)
         }
     ],
-    structuredContent: { items: results }
+    structuredContent: results
 });
 
 /**
