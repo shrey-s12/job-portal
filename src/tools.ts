@@ -6,6 +6,8 @@ import {
     DeleteJobSchema,
     MatchJobsForProfileSchema,
     MatchProfilesForJobSchema,
+    FilterProfilesSchema,
+    FilterJobsSchema,
     ToolResponseSchema,
     makeError,
 } from "./types.js";
@@ -16,6 +18,8 @@ import {
     deleteJob,
     matchJobsForProfile,
     matchProfilesForJob,
+    filterProfiles,
+    filterJobs,
 } from "./handlers.js";
 
 /**
@@ -115,6 +119,36 @@ export const matchProfilesForJobTool: ToolDefinition = {
 };
 
 /**
+ * Tool: Filter Candidate Profiles
+ */
+export const filterProfilesTool: ToolDefinition = {
+    name: "filter_profiles",
+    title: "Filter Candidate Profiles",
+    description: "Filter candidate profiles by multiple criteria including name, email, phone, location, skills, company, or role. All filters are optional and support partial matching. Useful for searching and discovering candidates.",
+    inputSchema: FilterProfilesSchema,
+    outputSchema: ToolResponseSchema,
+    handler: async (params, context) => {
+        const results = await filterProfiles(params);
+        return wrapToolResponse(results);
+    }
+};
+
+/**
+ * Tool: Filter Job Postings
+ */
+export const filterJobsTool: ToolDefinition = {
+    name: "filter_jobs",
+    title: "Filter Job Postings",
+    description: "Filter job postings by multiple criteria including title, company, location, experience required, salary, description, or required skills. All filters are optional and support partial matching. Salary filter returns jobs with salary greater than or equal to the specified amount. Useful for searching and discovering jobs.",
+    inputSchema: FilterJobsSchema,
+    outputSchema: ToolResponseSchema,
+    handler: async (params, context) => {
+        const results = await filterJobs(params);
+        return wrapToolResponse(results);
+    }
+};
+
+/**
  * All tools available in the system
  */
 export const allTools: ToolDefinition[] = [
@@ -124,4 +158,6 @@ export const allTools: ToolDefinition[] = [
     deleteJobTool,
     matchJobsForProfileTool,
     matchProfilesForJobTool,
+    filterProfilesTool,
+    filterJobsTool,
 ];

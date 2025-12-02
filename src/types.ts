@@ -82,6 +82,31 @@ export const MatchProfilesForJobSchema = z.object({
 export type MatchJobsForProfileInput = z.infer<typeof MatchJobsForProfileSchema>;
 export type MatchProfilesForJobInput = z.infer<typeof MatchProfilesForJobSchema>;
 
+/* ---------- Filter Schemas ---------- */
+export const FilterProfilesSchema = z.object({
+    name: z.string().optional().describe("Filter by candidate name (partial match)"),
+    email: z.string().optional().describe("Filter by email address (partial match)"),
+    phone: z.string().optional().describe("Filter by phone number (partial match)"),
+    location: z.string().optional().describe("Filter by preferred location (partial match)"),
+    skills: z.string().optional().describe("Filter by skill (matches if candidate has this skill)"),
+    company: z.string().optional().describe("Filter by company in experience (partial match)"),
+    role: z.string().optional().describe("Filter by role in experience (partial match)"),
+}).describe("Schema for filtering candidate profiles by various criteria");
+
+export const FilterJobsSchema = z.object({
+    title: z.string().optional().describe("Filter by job title (partial match)"),
+    company: z.string().optional().describe("Filter by company name (partial match)"),
+    location: z.string().optional().describe("Filter by job location (partial match)"),
+    experienceRequired: z.string().optional().describe("Filter by experience requirement (partial match)"),
+    salary: z.number().optional().describe("Filter by minimum salary"),
+    description: z.string().optional().describe("Filter by job description (partial match)"),
+    skillsRequired: z.string().optional().describe("Filter by required skill (matches if job requires this skill)"),
+}).describe("Schema for filtering job postings by various criteria");
+
+// Infer TypeScript type from schema
+export type FilterProfilesInput = z.infer<typeof FilterProfilesSchema>;
+export type FilterJobsInput = z.infer<typeof FilterJobsSchema>;
+
 /* ---------- Match Response Types ---------- */
 export type JobMatchResult = CreateJobInput & { id: number; matchScore?: number };
 export type ProfileMatchResult = CreateProfileInput & { id: number; matchScore?: number };

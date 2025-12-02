@@ -5,9 +5,13 @@ import {
     DeleteJobInput,
     MatchJobsForProfileInput,
     MatchProfilesForJobInput,
+    FilterProfilesInput,
+    FilterJobsInput,
     ToolResponse,
     makeSuccess,
     makeError,
+    Profile,
+    Job,
 } from "./types.js";
 import { profiles, jobs, nextId } from "./database.js";
 
@@ -120,5 +124,115 @@ export async function matchProfilesForJob(params: MatchProfilesForJobInput): Pro
         });
     } catch (error) {
         return makeError("MATCH_API_ERROR", "Failed to match profiles for job", String(error));
+    }
+}
+
+/**
+ * Filter candidate profiles by criteria
+ */
+export async function filterProfiles(params: FilterProfilesInput): Promise<ToolResponse> {
+    try {
+        let filtered = [...profiles];
+
+        // Apply filters
+        if (params.name) {
+            const search = params.name.toLowerCase();
+            filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
+        }
+
+        if (params.email) {
+            const search = params.email.toLowerCase();
+            filtered = filtered.filter(p => p.email.toLowerCase().includes(search));
+        }
+
+        if (params.phone) {
+            filtered = filtered.filter(p => p.phone.includes(params.phone!));
+        }
+
+        if (params.location) {
+            const search = params.location.toLowerCase();
+            filtered = filtered.filter(p => p.location?.toLowerCase().includes(search));
+        }
+
+        if (params.skills) {
+            const search = params.skills.toLowerCase();
+            filtered = filtered.filter(p => 
+                p.skills.some(skill => skill.toLowerCase().includes(search))
+            );
+        }
+
+        if (params.company) {
+            const search = params.company.toLowerCase();
+            filtered = filtered.filter(p => 
+                p.experience?.some(exp => exp.company.toLowerCase().includes(search))
+            );
+        }
+
+        if (params.role) {
+            const search = params.role.toLowerCase();
+            filtered = filtered.filter(p => 
+                p.experience?.some(exp => exp.role.toLowerCase().includes(search))
+            );
+        }
+
+        return makeSuccess({
+            count: filtered.length,
+            profiles: filtered
+        });
+    } catch (error) {
+        return makeError("FILTER_ERROR", "Failed to filter profiles", String(error));
+    }
+}
+
+/**
+ * Filter job postings by criteria
+ */
+export async function filterJobs(params: FilterJobsInput): Promise<ToolResponse> {
+    try {
+        let filtered = [...jobs];
+
+        // Apply filters
+        if (params.title) {
+            const search = params.title.toLowerCase();
+            filtered = filtered.filter(j => j.title.toLowerCase().includes(search));
+        }
+
+        if (params.company) {
+            const search = params.company.toLowerCase();
+            filtered = filtered.filter(j => j.company.toLowerCase().includes(search));
+        }
+
+        if (params.location) {
+            const search = params.location.toLowerCase();
+            filtered = filtered.filter(j => j.location.toLowerCase().includes(search));
+        }
+
+        if (params.experienceRequired) {
+            const search = params.experienceRequired.toLowerCase();
+            filtered = filtered.filter(j => j.experienceRequired?.toLowerCase().includes(search));
+        }
+
+        if (params.salary !== undefined) {
+            filtered = filtered.filter(j => (j.salary ?? 0) >= params.salary!);
+        }
+
+        if (params.description) {
+            const search = params.description.toLowerCase();
+            filtered = filtered.filter(j => j.description.toLowerCase().includes(search));
+        }
+
+        if (params.skillsRequired) {
+            const search = params.skillsRequired.toLowerCase();
+            filtered = filtered.filter(j => 
+                j.skillsRequired.some(skill => skill.toLowerCase().includes(search))
+            );
+        }
+
+        return makeSuccess({
+            count: filtered.length,
+            jobs: filtered
+        });
+    } catch (error) {
+        return makeError("FILTER_ERROR", "Failed to filter jobs", String(error));
     }
 }
