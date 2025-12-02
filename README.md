@@ -22,15 +22,15 @@ npm install
 
 ### Development Mode
 
-**HTTP Server** (for testing with curl/Postman):
+**Stdio Mode** (default - for MCP clients like Claude Desktop):
 ```bash
 npm run dev
-# Server runs on http://localhost:3000/mcp
 ```
 
-**Stdio Mode** (for MCP clients like Claude Desktop):
+**HTTP Server** (for testing with curl/Postman):
 ```bash
-npm run dev:stdio
+npm run dev:http
+# Server runs on http://localhost:3000/mcp
 ```
 
 ### Production Mode
@@ -40,14 +40,16 @@ npm run dev:stdio
 npm run build
 ```
 
-**Run HTTP server:**
+**Run Stdio server** (default):
 ```bash
 npm start
+# or
+job-portal
 ```
 
-**Run Stdio server:**
+**Run HTTP server** (explicit):
 ```bash
-npm run start:stdio
+npm run start:http
 ```
 
 ## Usage with Claude Desktop
@@ -60,6 +62,18 @@ Add to your `claude_desktop_config.json`:
     "job-portal": {
       "command": "node",
       "args": ["/absolute/path/to/mcp-job-portal/dist/stdio.js"]
+    }
+  }
+}
+```
+
+Or if installed globally/locally:
+
+```json
+{
+  "mcpServers": {
+    "job-portal": {
+      "command": "job-portal"
     }
   }
 }
@@ -149,10 +163,10 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed instructions.
 ### Project Scripts
 
 - `npm run build` - Compile TypeScript to JavaScript
-- `npm run dev` - Run HTTP server in development mode
-- `npm run dev:stdio` - Run Stdio server in development mode
-- `npm start` - Build and run HTTP server
-- `npm run start:stdio` - Build and run Stdio server
+- `npm run dev` - Run Stdio server in development mode (default)
+- `npm run dev:http` - Run HTTP server in development mode
+- `npm start` - Build and run Stdio server (default)
+- `npm run start:http` - Build and run HTTP server
 
 ## API Response Format
 

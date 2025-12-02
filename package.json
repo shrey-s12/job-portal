@@ -2,22 +2,27 @@
   "name": "job-portal",
   "version": "1.0.0",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/stdio.js",
   "bin": {
-    "job-portal-stdio": "dist/stdio.js"
+    "job-portal": "dist/stdio.js"
   },
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node dist/index.js",
-    "start:stdio": "npm run build && node dist/stdio.js",
-    "dev": "npx tsx src/index.ts",
-    "dev:stdio": "npx tsx src/stdio.ts",
+    "start": "npm run build && node dist/stdio.js",
+    "start:http": "npm run build && node dist/index.js",
+    "dev": "tsx src/stdio.ts",
+    "dev:http": "tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "job-portal",
+    "matching"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "MCP server for job matching platform with candidate profiles and job postings",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.22.0",
     "express": "^5.1.0",
@@ -26,6 +31,7 @@
   "devDependencies": {
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

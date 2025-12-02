@@ -165,16 +165,16 @@ That's it! The tool will automatically be registered when the server starts.
 
 ### Development Mode (with hot reload)
 
-**HTTP Transport:**
+**Stdio Transport** (default):
 ```bash
 npm run dev
-# Server starts on http://localhost:3000/mcp
+# Connects via stdin/stdout for MCP clients
 ```
 
-**Stdio Transport:**
+**HTTP Transport** (explicit):
 ```bash
-npm run dev:stdio
-# Connects via stdin/stdout for MCP clients
+npm run dev:http
+# Server starts on http://localhost:3000/mcp
 ```
 
 ### Production Mode
@@ -185,42 +185,30 @@ npm run build
 # Compiles TypeScript to JavaScript in dist/ folder
 ```
 
-**HTTP Transport:**
+**Stdio Transport** (default):
 ```bash
 npm start
-# Builds and starts HTTP server on http://localhost:3000/mcp
+# Builds and starts stdio transport for direct MCP connections
 ```
 
-**Stdio Transport:**
+**HTTP Transport** (explicit):
 ```bash
-npm run start:stdio
-# Builds and starts stdio transport for direct MCP connections
+npm run start:http
+# Builds and starts HTTP server on http://localhost:3000/mcp
 ```
 
 **Using the binary:**
 ```bash
 # After npm install -g or npm link
-job-portal-stdio
+job-portal
 ```
 
 ## Transport Options
 
-### HTTP Transport (`index.ts`)
-- **Protocol**: HTTP POST requests
-- **Endpoint**: `http://localhost:3000/mcp`
-- **Use cases**: 
-  - Web applications
-  - REST API clients
-  - Testing with curl/Postman
-- **Advantages**: 
-  - Easy to test
-  - Works with standard HTTP tools
-  - Can handle multiple concurrent connections
-
-### Stdio Transport (`stdio.ts`)
+### Stdio Transport (`stdio.ts`) - **DEFAULT**
 - **Protocol**: Standard input/output streams
 - **Use cases**:
-  - Claude Desktop integration
+  - Claude Desktop integration (recommended)
   - MCP Inspector
   - Command-line tools
   - Direct MCP client connections
@@ -228,6 +216,20 @@ job-portal-stdio
   - Lower latency
   - Native MCP protocol
   - Standard for MCP server implementations
+  - No network configuration needed
+
+### HTTP Transport (`index.ts`) - **EXPLICIT**
+- **Protocol**: HTTP POST requests
+- **Endpoint**: `http://localhost:3000/mcp`
+- **Use cases**: 
+  - Web applications
+  - REST API clients
+  - Testing with curl/Postman
+  - Development and debugging
+- **Advantages**: 
+  - Easy to test
+  - Works with standard HTTP tools
+  - Can handle multiple concurrent connections
 
 ## Claude Desktop Configuration
 
@@ -250,7 +252,7 @@ Or if installed globally:
 {
   "mcpServers": {
     "job-portal": {
-      "command": "job-portal-stdio"
+      "command": "job-portal"
     }
   }
 }
