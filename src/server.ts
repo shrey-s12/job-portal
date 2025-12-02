@@ -18,7 +18,7 @@ export function createMcpServer(): McpServer {
     registerTools(server, allTools);
 
     // Register all resource templates
-    registerResourceTemplates(server, []);
+    registerResourceTemplates(server, allResources);
 
     return server;
 }
@@ -90,7 +90,7 @@ function registerResourceTemplates(server: McpServer, resources: ResourceTemplat
     for (const resource of resources) {
         server.registerResource(
             resource.name,
-            resource.uriTemplate,
+            resource.template,
             {
                 title: resource.title,
                 description: resource.description
@@ -98,13 +98,13 @@ function registerResourceTemplates(server: McpServer, resources: ResourceTemplat
             resource.handler
         );
     }
-    server.registerResource(
-        "profiles",
-        profileByIdTemplate,
-        {
-            title: "Candidate Profile by ID",
-            description: "Retrieve a candidate profile by its unique ID.",
-        },
-        profileByIdHandler,
-    )
+    // server.registerResource(
+    //     "profiles",
+    //     profileByIdTemplate,
+    //     {
+    //         title: "Candidate Profile by ID",
+    //         description: "Retrieve a candidate profile by its unique ID.",
+    //     },
+    //     profileByIdHandler,
+    // )
 }

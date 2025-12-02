@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { Variables } from "@modelcontextprotocol/sdk/shared/uriTemplate.js";
 import { ToolResponseSchema } from "./types.js";
 
 /**
@@ -29,10 +31,10 @@ export interface ResourceDefinition {
  */
 export interface ResourceTemplateDefinition {
     name: string;
-    uriTemplate: string;
+    template: ResourceTemplate;
     title: string;
     description: string;
-    handler: (uri: URL) => Promise<any>;
+    handler: (uri: URL, variables?: Variables) => Promise<any>;
 }
 
 /**
@@ -56,6 +58,28 @@ export const formatResourceList = (uri: URL, results: any[]) => ({
         }
     ],
     structuredContent: { items: results }
+});
+
+/**
+ * Helper function to format single resource response
+ */
+export const formatSingleResource = (uri: URL, result: any) => ({
+    contents: [
+        {
+            uri: String(uri),
+            mimeType: "application/json",
+            text: JSON.stringify(result)
+        }
+    ],
+    structuredContent: result
+});
+
+/**
+ * Helper function to format empty resource response
+ */
+export const formatEmptyResource = () => ({
+    contents: [],
+    structuredContent: { items: [] }
 });
 
 /**

@@ -1,47 +1,148 @@
-import { ResourceTemplateDefinition, formatResourceList, filterEntities } from "./interfaces.js";
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { Variables } from "@modelcontextprotocol/sdk/shared/uriTemplate.js";
+import { ResourceTemplateDefinition, formatResourceList, formatSingleResource, formatEmptyResource, filterEntities } from "./interfaces.js";
 import { profiles, jobs } from "./database.js";
 
 /**
- * Resource Template: Filter Candidate Profiles
- * Supports filtering by any profile field using query parameters
- * Examples:
- *   profiles://filter?name=John
- *   profiles://filter?location=Remote
- *   profiles://filter?skills=JavaScript
- *   profiles://filter?skills=React&location=Bangalore
+ * Resource Template: Profile by ID
+ */
+export const profileByIdResource: ResourceTemplateDefinition = {
+    name: "profile_by_id",
+    template: new ResourceTemplate(
+        "profile://{id}",
+        {
+            list: undefined,
+            complete: {
+                id: (value) => {
+                    const matchingIds = profiles.map(p => p.id.toString()).filter(pid => pid.includes(value));
+                    return matchingIds;
+                }
+            }
+        }
+    ),
+    title: "Candidate Profile by ID",
+    description: "Retrieve a candidate profile by its unique ID. Use profile://123 where 123 is the profile ID.",
+    handler: async (uri, variables) => {
+        const idParam = variables?.id;
+        let stringIds: string[] = [];
+        if (Array.isArray(idParam)) {
+            stringIds = idParam;
+        } else if (typeof idParam === "string") {
+            stringIds = [idParam];
+        }
+        const ids = stringIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+        const profile = profiles.find(p => ids.includes(p.id));
+        
+        if (!profile) {
+            return formatEmptyResource();
+        }
+
+        return formatSingleResource(uri, profile);
+    }
+};
+
+/**
+ * Resource Template: Job by ID
+ */
+export const jobByIdResource: ResourceTemplateDefinition = {
+    name: "job_by_id",
+    template: new ResourceTemplate(
+        "job://{id}",
+        {
+            list: undefined,
+            complete: {
+                id: (value) => {
+                    const matchingIds = jobs.map(j => j.id.toString()).filter(jid => jid.includes(value));
+                    return matchingIds;
+                }
+            }
+        }
+    ),
+    title: "Job Posting by ID",
+    description: "Retrieve a job posting by its unique ID. Use job://123 where 123 is the job ID.",
+    handler: async (uri, variables) => {
+        const idParam = variables?.id;
+        let stringIds: string[] = [];
+        if (Array.isArray(idParam)) {
+            stringIds = idParam;
+        } else if (typeof idParam === "string") {
+            stringIds = [idParam];
+        }
+        const ids = stringIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+        const job = jobs.find(j => ids.includes(j.id));
+        
+        if (!job) {
+            return formatEmptyResource();
+        }
+
+        return formatSingleResource(uri, job);
+    }
+};
+
+/**
+ * Resource Template: Filter Profiles
  */
 export const filterProfilesResource: ResourceTemplateDefinition = {
     name: "filter_profiles",
-    uriTemplate: "profiles://filter{?name,email,phone,location,skills,company,role}",
+    template: new ResourceTemplate(
+        "profiles://filter{?name,email,phone,location,skills,company,role}",
+        {
+            list: async () => ({
+                resources: profiles.map(p => ({
+                    uri: `profile://${p.id}`,
+                    name: p.name,
+                    description: `${p.name} - ${p.skills.join(", ")} - ${p.location || "Location not specified"}`,
+                    mimeType: "application/json"
+                }))
+            })
+        }
+    ),
     title: "Filter Candidate Profiles",
-    description: "Filter candidate profiles by any field. Supports partial matching for text fields and array fields. Query parameters: name, email, phone, location, skills (matches any skill), company (in experience), role (in experience).",
-    handler: async (uri) => {
-        const searchParams = new URL(uri).searchParams;
-        const filtered = filterEntities(profiles, searchParams);
+    description: "Filter candidate profiles by query parameters. Supports: name, email, phone, location, skills (matches any skill), company (in experience), role (in experience). Use profiles://filter?location=Remote",
+    handler: async (uri, variables) => {
+        const searchParams = new URLSearchParams();
+        if (variables) {
+            for (const [key, value] of Object.entries(variables)) {
+                const val = Array.isArray(value) ? value[0] : value;
+                searchParams.set(key, val);
+            }
+        }
         
+        const filtered = filterEntities(profiles, searchParams);
         return formatResourceList(uri, filtered);
     }
 };
 
 /**
- * Resource Template: Filter Job Postings
- * Supports filtering by any job field using query parameters
- * Examples:
- *   jobs://filter?title=Developer
- *   jobs://filter?company=Tech
- *   jobs://filter?location=Remote
- *   jobs://filter?skillsRequired=JavaScript
- *   jobs://filter?skillsRequired=React&location=Bangalore
+ * Resource Template: Filter Jobs
  */
 export const filterJobsResource: ResourceTemplateDefinition = {
     name: "filter_jobs",
-    uriTemplate: "jobs://filter{?title,company,location,experienceRequired,salary,description,skillsRequired}",
+    template: new ResourceTemplate(
+        "jobs://filter{?title,company,location,experienceRequired,salary,description,skillsRequired}",
+        {
+            list: async () => ({
+                resources: jobs.map(j => ({
+                    uri: `job://${j.id}`,
+                    name: j.title,
+                    description: `${j.title} at ${j.company} - ${j.location} - ${j.skillsRequired.join(", ")}`,
+                    mimeType: "application/json"
+                }))
+            })
+        }
+    ),
     title: "Filter Job Postings",
-    description: "Filter job postings by any field. Supports partial matching for text fields and array fields. Query parameters: title, company, location, experienceRequired, salary, description, skillsRequired (matches any required skill).",
-    handler: async (uri) => {
-        const searchParams = new URL(uri).searchParams;
-        const filtered = filterEntities(jobs, searchParams);
+    description: "Filter job postings by query parameters. Supports: title, company, location, experienceRequired, salary, description, skillsRequired (matches any required skill). Use jobs://filter?location=Remote",
+    handler: async (uri, variables) => {
+        const searchParams = new URLSearchParams();
+        if (variables) {
+            for (const [key, value] of Object.entries(variables)) {
+                const val = Array.isArray(value) ? value[0] : value;
+                searchParams.set(key, val);
+            }
+        }
         
+        const filtered = filterEntities(jobs, searchParams);
         return formatResourceList(uri, filtered);
     }
 };
@@ -50,6 +151,8 @@ export const filterJobsResource: ResourceTemplateDefinition = {
  * All resource templates available in the system
  */
 export const allResources: ResourceTemplateDefinition[] = [
+    profileByIdResource,
+    jobByIdResource,
     filterProfilesResource,
     filterJobsResource,
 ];
