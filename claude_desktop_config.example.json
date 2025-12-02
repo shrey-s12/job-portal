@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "job-portal": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/mcp-job-portal/dist/stdio.js"
+      ]
+    }
+  }
+}

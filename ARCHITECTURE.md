@@ -7,6 +7,7 @@ This document describes the modular architecture of the Job Portal MCP Server.
 ```
 src/
 ├── index.ts          # Entry point - Express HTTP server
+├── stdio.ts          # Entry point - Stdio transport for MCP clients
 ├── server.ts         # MCP server creation and configuration
 ├── interfaces.ts     # Interfaces for tools and resources
 ├── types.ts          # Zod schemas and TypeScript types
@@ -22,6 +23,13 @@ src/
 - Sets up the Express HTTP server
 - Configures the `/mcp` endpoint
 - Handles HTTP transport for MCP protocol
+- **Use case**: Web-based MCP clients, REST API access
+- **Does not contain**: Business logic, tool definitions, or MCP setup
+
+### `stdio.ts` - Stdio Transport Entry Point
+- Uses StdioServerTransport for direct MCP client connections
+- Communicates via stdin/stdout
+- **Use case**: Claude Desktop, MCP Inspector, CLI tools
 - **Does not contain**: Business logic, tool definitions, or MCP setup
 
 ### `server.ts` - MCP Server Configuration
@@ -155,9 +163,95 @@ That's it! The tool will automatically be registered when the server starts.
 
 ## Running the Server
 
+### Development Mode (with hot reload)
+
+**HTTP Transport:**
 ```bash
-npm install
-npm start
+npm run dev
+# Server starts on http://localhost:3000/mcp
 ```
 
-The server will start on `http://localhost:3000/mcp`
+**Stdio Transport:**
+```bash
+npm run dev:stdio
+# Connects via stdin/stdout for MCP clients
+```
+
+### Production Mode
+
+**Build the project:**
+```bash
+npm run build
+# Compiles TypeScript to JavaScript in dist/ folder
+```
+
+**HTTP Transport:**
+```bash
+npm start
+# Builds and starts HTTP server on http://localhost:3000/mcp
+```
+
+**Stdio Transport:**
+```bash
+npm run start:stdio
+# Builds and starts stdio transport for direct MCP connections
+```
+
+**Using the binary:**
+```bash
+# After npm install -g or npm link
+job-portal-stdio
+```
+
+## Transport Options
+
+### HTTP Transport (`index.ts`)
+- **Protocol**: HTTP POST requests
+- **Endpoint**: `http://localhost:3000/mcp`
+- **Use cases**: 
+  - Web applications
+  - REST API clients
+  - Testing with curl/Postman
+- **Advantages**: 
+  - Easy to test
+  - Works with standard HTTP tools
+  - Can handle multiple concurrent connections
+
+### Stdio Transport (`stdio.ts`)
+- **Protocol**: Standard input/output streams
+- **Use cases**:
+  - Claude Desktop integration
+  - MCP Inspector
+  - Command-line tools
+  - Direct MCP client connections
+- **Advantages**:
+  - Lower latency
+  - Native MCP protocol
+  - Standard for MCP server implementations
+
+## Claude Desktop Configuration
+
+To use this server with Claude Desktop, add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "job-portal": {
+      "command": "node",
+      "args": ["/path/to/mcp-job-portal/dist/stdio.js"]
+    }
+  }
+}
+```
+
+Or if installed globally:
+
+```json
+{
+  "mcpServers": {
+    "job-portal": {
+      "command": "job-portal-stdio"
+    }
+  }
+}
+```

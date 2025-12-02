@@ -1,10 +1,18 @@
 {
   "name": "job-portal",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "job-portal-stdio": "dist/stdio.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx tsx src/index.ts"
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "start:stdio": "npm run build && node dist/stdio.js",
+    "dev": "npx tsx src/index.ts",
+    "dev:stdio": "npx tsx src/stdio.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
