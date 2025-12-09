@@ -3,7 +3,7 @@ import { Profile, Job } from "./types.js";
 // In-memory database
 export const profiles: Profile[] = [
     {"id":1,"name":"Jahnavi Jha","email":"priya.sharma@email.com","phone":"9876543210","skills":["Python","Django","PostgreSQL","REST APIs","Docker","AWS"],"experience":[{"company":"Tech Solutions Pvt Ltd","role":"Backend Developer","duration":"2 years"},{"company":"StartupHub","role":"Junior Developer","duration":"1 year"}],"location":"Bangalore"},
-    {"id":2,"name":"Mohit Kumar","email":"rahul.verma@email.com","phone":"8765432109","skills":["SEO","Google Analytics","Content Marketing","Social Media Marketing","SEM","WordPress"],"experience":[{"company":"Digital Marketing Pro","role":"SEO Specialist","duration":"3 years"}],"location":"Remote"},
+    {"id":2,"name":"Shrey Singhal","email":"shreynbd@gmail.com","phone":"8057260114","skills":["SEO","Google Analytics","Content Marketing","Social Media Marketing","SEM","WordPress"],"experience":[{"company":"Digital Marketing Pro","role":"SEO Specialist","duration":"3 years"}],"location":"Remote"},
     {"id":3,"name":"Yash Singla","email":"neha.patel@email.com","phone":"8877665544","skills":["Figma","Adobe XD","Sketch","UI Design","UX Research","Prototyping","Wireframing","User Testing"],"experience":[{"company":"DesignStudio","role":"UI/UX Designer","duration":"3 years"},{"company":"Creative Agency","role":"Graphic Designer","duration":"1 year"}],"location":"Mumbai"},
 ];
 export const jobs: Job[] = [

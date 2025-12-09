@@ -16,6 +16,7 @@ import {
 } from "./types.js";
 import {
     findUserProfileById,
+    findUserProfileByEmail,
     createProfile,
     createJob,
     deleteProfile,
@@ -30,43 +31,81 @@ import {
 /* -----------------------------------------------------
    🔐 SECURED TOOL – Get Profile Using Bearer Token
 ------------------------------------------------------ */
+// export const getProfileSecureTool: ToolDefinition = {
+//     name: "get_profile_secure",
+//     title: "Get Candidate Profile (Secured)",
+//     description: "Requires Bearer Token. Only returns the profile linked with the token userId.",
+//     inputSchema: z.object({}), // no params needed
+//     outputSchema: ToolResponseSchema,
+
+//     handler: async (_params, context) => {
+//         try {
+//             // MCP HTTP transport => headers inside requestInfo
+//             const reqInfo: any = (context as any)?.requestInfo ?? {};
+//             const headers = (reqInfo.headers ?? {}) as Record<string, string | string[] | undefined>;
+
+//             const authHeader =
+//                 (headers["authorization"] as string | undefined) ??
+//                 (headers["Authorization"] as string | undefined);
+
+//             const userIdFromToken = verifyAuthToken(authHeader);
+
+//             const userId = Number(userIdFromToken);
+//             if (!Number.isFinite(userId)) {
+//                 return wrapToolResponse(makeError("UNAUTHORIZED", "Invalid user ID from token"));
+//             }
+
+//             const results = await findUserProfileById(userId);
+
+//             if (!results.success) {
+//                 return wrapToolResponse(makeError("NO_PROFILE", "User profile not found"));
+//             }
+
+//             return wrapToolResponse(results);
+//         } catch (error: any) {
+//             return wrapToolResponse(
+//                 makeError("UNAUTHORIZED", error?.message || "Unauthorized")
+//             );
+//         }
+//     },
+// };
+
 export const getProfileSecureTool: ToolDefinition = {
     name: "get_profile_secure",
     title: "Get Candidate Profile (Secured)",
-    description: "Requires Bearer Token. Only returns the profile linked with the token userId.",
-    inputSchema: z.object({}), // no params needed
+    description: "Returns user profile based on email inside Google JWT Token",
+    inputSchema: z.object({}),
     outputSchema: ToolResponseSchema,
 
     handler: async (_params, context) => {
         try {
-            // MCP HTTP transport => headers inside requestInfo
             const reqInfo: any = (context as any)?.requestInfo ?? {};
-            const headers = (reqInfo.headers ?? {}) as Record<string, string | string[] | undefined>;
+            const headers = reqInfo?.headers ?? {};
 
             const authHeader =
-                (headers["authorization"] as string | undefined) ??
-                (headers["Authorization"] as string | undefined);
+                headers["authorization"] ||
+                headers["Authorization"];
 
-            const userIdFromToken = verifyAuthToken(authHeader);
+            // Now this returns {userId,email,name,iAt,exp}
+            const decoded: any = verifyAuthToken(authHeader);
+            console.log("Decoded token:", decoded);
 
-            const userId = Number(userIdFromToken);
-            if (!Number.isFinite(userId)) {
-                return wrapToolResponse(makeError("UNAUTHORIZED", "Invalid user ID from token"));
-            }
+            if (!decoded?.email)
+                return wrapToolResponse(makeError("UNAUTHORIZED", "Email missing in token"));
+            
+            console.log("Email from token:", decoded.email);
 
-            const results = await findUserProfileById(userId);
+            const results = await findUserProfileByEmail(decoded.email);
 
-            if (!results.success) {
-                return wrapToolResponse(makeError("NO_PROFILE", "User profile not found"));
-            }
+            if (!results.success)
+                return wrapToolResponse(makeError("NO_PROFILE", "No profile found for this email"));
 
             return wrapToolResponse(results);
+
         } catch (error: any) {
-            return wrapToolResponse(
-                makeError("UNAUTHORIZED", error?.message || "Unauthorized")
-            );
+            return wrapToolResponse(makeError("UNAUTHORIZED", error.message));
         }
-    },
+    }
 };
 
 

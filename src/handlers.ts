@@ -29,6 +29,18 @@ export async function findUserProfileById(userId: number): Promise<ToolResponse>
 }
 
 /**
+ * Find user profile by EMAIL
+ */
+export async function findUserProfileByEmail(email: string): Promise<ToolResponse> {
+    const profile = profiles.find(p => p.email === email);
+    if (!profile) {
+        return makeError("NO_PROFILE", `Profile for email ${email} not found`);
+    }
+    return makeSuccess(profile);
+}
+
+
+/**
  * Create a new candidate profile
  */
 export async function createProfile(profile: CreateProfileInput): Promise<ToolResponse> {

@@ -1,7 +1,7 @@
 // src/auth.ts
 import jwt from "jsonwebtoken";
 
-const SECRET = process.env.JWT_SECRET || "JOB_PORTAL_DEMO_SECRET";
+const SECRET = process.env.JWT_SECRET || "JOB_PORTAL_OAUTH_SECRET";
 
 export function verifyAuthToken(authHeader?: string) {
     if (!authHeader) {
@@ -15,8 +15,10 @@ export function verifyAuthToken(authHeader?: string) {
     }
 
     try {
-        const decoded = jwt.verify(token, SECRET) as { userId: string };
-        return decoded.userId;
+        // const decoded = jwt.verify(token, SECRET) as { userId: string };
+        // return decoded.userId;
+
+        return jwt.verify(token, SECRET);
     } catch {
         throw new Error("Unauthorized - Invalid or expired token");
     }
