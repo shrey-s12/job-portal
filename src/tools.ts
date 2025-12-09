@@ -13,8 +13,11 @@ import {
     FilterJobsSchema,
     ToolResponseSchema,
     makeError,
+    FavoriteColor,
 } from "./types.js";
 import {
+    getFavoriteColorByEmail,
+    setFavoriteColorByEmail,
     findUserProfileById,
     findUserProfileByEmail,
     createProfile,
@@ -27,6 +30,69 @@ import {
     filterJobs,
 } from "./handlers.js";
 
+
+/**
+ * Tool: Get Favorite Color by Email
+ */
+export const getMyFavoriteColorTool: ToolDefinition = {
+    name: "get_my_favorite_color",
+    title: "Get My Favorite Color",
+    description: "Returns your favorite color using your email extracted from JWT token.",
+    inputSchema: z.object({}),
+    outputSchema: ToolResponseSchema,
+
+    handler: async (_params, context) => {
+        try {
+            const reqInfo: any = (context as any)?.requestInfo ?? {};
+            const headers = reqInfo?.headers ?? {};
+
+            const authHeader = headers["authorization"] || headers["Authorization"];
+            const decoded: any = verifyAuthToken(authHeader);
+
+            if (!decoded?.email)
+                return wrapToolResponse(makeError("UNAUTHORIZED", "Email missing in token"));
+
+            const result = await getFavoriteColorByEmail(decoded.email);
+            return wrapToolResponse(result);
+
+        } catch (err: any) {
+            return wrapToolResponse(makeError("UNAUTHORIZED", err.message));
+        }
+    }
+};
+
+/**
+ * Tool: Set Favorite Color by Email
+ */
+export const setMyFavoriteColorTool: ToolDefinition = {
+    name: "set_my_favorite_color",
+    title: "Set My Favorite Color",
+    description: "Save your favorite color in the system. Auth required.",
+
+    inputSchema: z.object({
+        color: z.string().min(1).describe("Your favorite color (e.g., Blue, Red, Purple)")
+    }),
+    outputSchema: ToolResponseSchema,
+
+    handler: async ({ color }, context) => {
+        try {
+            const reqInfo: any = (context as any)?.requestInfo ?? {};
+            const headers = reqInfo?.headers ?? {};
+
+            const authHeader = headers["authorization"] || headers["Authorization"];
+            const decoded: any = verifyAuthToken(authHeader);
+
+            if (!decoded?.email)
+                return wrapToolResponse(makeError("UNAUTHORIZED", "Email missing in token"));
+
+            const result = await setFavoriteColorByEmail(decoded.email, color);
+            return wrapToolResponse(result);
+
+        } catch (err: any) {
+            return wrapToolResponse(makeError("UNAUTHORIZED", err.message));
+        }
+    }
+};
 
 /* -----------------------------------------------------
    🔐 SECURED TOOL – Get Profile Using Bearer Token
@@ -92,7 +158,7 @@ export const getProfileSecureTool: ToolDefinition = {
 
             if (!decoded?.email)
                 return wrapToolResponse(makeError("UNAUTHORIZED", "Email missing in token"));
-            
+
             console.log("Email from token:", decoded.email);
 
             const results = await findUserProfileByEmail(decoded.email);
@@ -107,7 +173,6 @@ export const getProfileSecureTool: ToolDefinition = {
         }
     }
 };
-
 
 /**
  * Tool: Create Candidate Profile
@@ -239,6 +304,8 @@ export const filterJobsTool: ToolDefinition = {
  * All tools available in the system
  */
 export const allTools: ToolDefinition[] = [
+    getMyFavoriteColorTool,
+    setMyFavoriteColorTool,
     getProfileSecureTool,
     createProfileTool,
     createJobTool,

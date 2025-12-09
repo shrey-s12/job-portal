@@ -12,10 +12,33 @@ import {
     makeError,
     Profile,
     Job,
+    FavoriteColor,
 } from "./types.js";
-import { profiles, jobs, nextId } from "./database.js";
+import { profiles, jobs, favoriteColors, nextId } from "./database.js";
 import { filterEntities } from "./interfaces.js";
 
+/**
+ * GET favorite color by email
+ */
+export async function getFavoriteColorByEmail(email: string): Promise<ToolResponse> {
+    const entry = favoriteColors.find(c => c.email === email);
+
+    if (!entry) return makeError("NO_COLOR_FOUND", `Favorite color not set for ${email}`);
+
+    return makeSuccess({ email, color: entry.color });
+}
+
+/** 
+ * Set favorite color for a candidate
+ */
+export async function setFavoriteColorByEmail(email: string, color: string): Promise<ToolResponse> {
+    let entry = favoriteColors.find(c => c.email === email);
+
+    if (entry) entry.color = color;
+    else favoriteColors.push({ email, color });
+
+    return makeSuccess({ message: "Favorite color saved successfully", email, color });
+}
 
 /**
  * Find user profile by user ID
