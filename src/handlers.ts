@@ -16,6 +16,18 @@ import {
 import { profiles, jobs, nextId } from "./database.js";
 import { filterEntities } from "./interfaces.js";
 
+
+/**
+ * Find user profile by user ID
+ */
+export async function findUserProfileById(userId: number): Promise<ToolResponse> {
+    const profile = profiles.find(p => p.id === userId);
+    if (!profile) {
+        return makeError("NO_PROFILE", `Profile for user ID ${userId} not found`);
+    }
+    return makeSuccess(profile);
+}
+
 /**
  * Create a new candidate profile
  */
@@ -134,7 +146,7 @@ export async function matchProfilesForJob(params: MatchProfilesForJobInput): Pro
 export async function filterProfiles(params: FilterProfilesInput): Promise<ToolResponse> {
     try {
         const searchParams = new URLSearchParams();
-        
+
         // Build search params from filter input
         if (params.name) searchParams.set("name", params.name);
         if (params.email) searchParams.set("email", params.email);
@@ -161,7 +173,7 @@ export async function filterProfiles(params: FilterProfilesInput): Promise<ToolR
 export async function filterJobs(params: FilterJobsInput): Promise<ToolResponse> {
     try {
         const searchParams = new URLSearchParams();
-        
+
         // Build search params from filter input
         if (params.title) searchParams.set("title", params.title);
         if (params.company) searchParams.set("company", params.company);
