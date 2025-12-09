@@ -114,3 +114,12 @@ export type ProfileMatchResult = CreateProfileInput & { id: number; matchScore?:
 /* ---------- Profile & Job Types ---------- */
 export type Profile = CreateProfileInput & { id: number };
 export type Job = CreateJobInput & { id: number };
+
+
+// Favorite Color Schema and Type
+export const FavoriteColorSchema = z.object({
+    email: z.string().email("Invalid email address").describe("Email address of the candidate (e.g., shreynbd@gmail.com)"),
+    color: z.string().min(1, "Color is required").describe("Favorite color of the candidate (e.g., blue)"),
+}).describe("Schema for storing candidate's favorite color");
+
+export type FavoriteColor = z.infer<typeof FavoriteColorSchema>;
