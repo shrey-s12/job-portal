@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Variables } from "@modelcontextprotocol/sdk/shared/uriTemplate.js";
 import { ToolResponseSchema } from "./types.js";
+import { type User } from "@clerk/express";
 
 /**
  * Interface for defining MCP tools in a consistent manner
@@ -12,7 +13,7 @@ export interface ToolDefinition<TInput = any> {
     description: string;
     inputSchema: z.ZodType<TInput>;
     outputSchema: typeof ToolResponseSchema;
-    handler: (params: TInput, context?: any) => Promise<any>;
+    handler: (params: TInput, user: User, context?: any) => Promise<any>;
 }
 
 /**

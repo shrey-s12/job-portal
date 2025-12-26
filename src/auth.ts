@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { type Application } from "express";
-import { clerkMiddleware } from '@clerk/express'
+import { clerkClient, clerkMiddleware } from '@clerk/express'
 import cors from 'cors'
 import { authServerMetadataHandlerClerk, mcpAuthClerk, protectedResourceHandlerClerk } from "@clerk/mcp-tools/express";
 
@@ -27,3 +27,9 @@ export function useAuthMiddleware(app: Application) {
 }
 
 export const mcpAuthMiddleware = mcpAuthClerk;
+
+export async function userDataFromContext({ authInfo }: { authInfo?: any }) {
+    const userId = authInfo!.extra!.userId! as string;
+    const userData = await clerkClient.users.getUser(userId);
+    return userData;
+}

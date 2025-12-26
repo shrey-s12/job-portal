@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ToolDefinition, ResourceTemplateDefinition } from "./interfaces.js";
 import { allTools } from "./tools.js";
 import { allResources } from "./resources.js";
+import { userDataFromContext } from "./auth.js";
 
 /**
  * Create and configure the MCP server
@@ -34,7 +35,10 @@ function registerTools(server: McpServer, tools: ToolDefinition[]): void {
                 inputSchema: tool.inputSchema,
                 outputSchema: tool.outputSchema
             },
-            tool.handler
+            async (params, context) => {
+                const user = await userDataFromContext(context);
+                return tool.handler(params, user, context);
+            },
         );
     }
 }
