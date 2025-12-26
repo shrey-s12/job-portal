@@ -1,6 +1,7 @@
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import express from 'express';
 import { createMcpServer } from "./server.js";
+import { mcpAuthMiddleware, registerWellKnownHandlers, useAuthMiddleware } from './auth.js';
 
 /**
  * Main entry point for the Job Portal MCP Server
@@ -12,9 +13,10 @@ const server = createMcpServer();
 
 // Set up Express and HTTP transport
 const app = express();
+useAuthMiddleware(app);
 app.use(express.json());
 
-app.post('/mcp', async (req, res) => {
+app.post('/mcp', mcpAuthMiddleware, async (req, res) => {
     // Create a new transport for each request to prevent request ID collisions
     const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
@@ -28,6 +30,7 @@ app.post('/mcp', async (req, res) => {
     await server.connect(transport);
     await transport.handleRequest(req, res, req.body);
 });
+registerWellKnownHandlers(app);
 
 const PORT = 3000;
 app.listen(PORT, () => {
