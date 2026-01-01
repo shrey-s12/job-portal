@@ -1,6 +1,7 @@
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import express from 'express';
 import { createMcpServer } from "./server.js";
+import { mcpAuthMiddleware, registerWellKnownHandlers, useAuthMiddleware } from './auth.js';
+import { streamableHttpHandler } from '@clerk/mcp-tools/express';
 
 /**
  * Main entry point for the Job Portal MCP Server
@@ -12,24 +13,17 @@ const server = createMcpServer();
 
 // Set up Express and HTTP transport
 const app = express();
+useAuthMiddleware(app);
 app.use(express.json());
 
-app.post('/mcp', async (req, res) => {
-    // Create a new transport for each request to prevent request ID collisions
-    const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-        enableJsonResponse: true
-    });
 
-    res.on('close', () => {
-        transport.close();
-    });
-
-    await server.connect(transport);
-    await transport.handleRequest(req, res, req.body);
+app.get('/', (_req, res) => {
+    res.send('Job Portal MCP Server is running. Use the /mcp endpoint for MCP interactions.');
 });
+app.post('/mcp', mcpAuthMiddleware, streamableHttpHandler(server)); // TODO: keep auth middleware optional/configurable, invert clerk dependency
+registerWellKnownHandlers(app);
 
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 app.listen(PORT, () => {
     console.log(`Job Portal MCP Server is running on http://localhost:${PORT}/mcp`);
 }).on('error', error => {
