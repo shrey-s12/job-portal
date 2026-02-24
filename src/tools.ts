@@ -35,8 +35,7 @@ export const createProfileTool: ToolDefinition = {
 	handler: async (params, user, context) => {
 		// const results = await createProfile(params);
 
-        
-		const response = await fetch('http://localhost:5000/api/profiles', {
+		const response = await fetch('http://localhost:5000/api/profiles/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -63,8 +62,11 @@ export const createJobTool: ToolDefinition = {
 	inputSchema: CreateJobSchema,
 	outputSchema: ToolResponseSchema,
 	handler: async (params, user, context) => {
+		console.log('Creating job with params:', params);
+		console.log('User:', user);
+		console.log('User ID:', user.id);
 		// const results = await createJob(params);
-		const response = await fetch('http://localhost:5000/api/jobs', {
+		const response = await fetch('http://localhost:5000/api/jobs/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
