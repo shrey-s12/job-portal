@@ -35,7 +35,7 @@ export interface ResourceTemplateDefinition {
     template: ResourceTemplate;
     title: string;
     description: string;
-    handler: (uri: URL, variables?: Variables) => Promise<any>;
+    handler: (uri: URL, variables?: Variables, context?: any) => Promise<any>;
 }
 
 /**

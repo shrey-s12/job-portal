@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { ToolDefinition, wrapToolResponse } from './interfaces.js';
 import {
 	CreateProfileSchema,
@@ -11,16 +12,18 @@ import {
 	ToolResponseSchema,
 	makeError,
 } from './types.js';
-import {
-	createProfile,
-	createJob,
-	deleteProfile,
-	deleteJob,
-	matchJobsForProfile,
-	matchProfilesForJob,
-	filterProfiles,
-	filterJobs,
-} from './handlers.js';
+// import {
+// 	createProfile,
+// 	createJob,
+// 	deleteProfile,
+// 	deleteJob,
+// 	matchJobsForProfile,
+// 	matchProfilesForJob,
+// 	filterProfiles,
+// 	filterJobs,
+// } from './handlers.js';
+
+const BACKEND_URL = process.env.BACKEND_URL;
 
 /**
  * Tool: Create Candidate Profile
@@ -35,7 +38,7 @@ export const createProfileTool: ToolDefinition = {
 	handler: async (params, user, context) => {
 		// const results = await createProfile(params);
 
-		const response = await fetch('http://localhost:5000/api/profiles/', {
+		const response = await fetch(`${BACKEND_URL}/profiles`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -43,6 +46,11 @@ export const createProfileTool: ToolDefinition = {
 			},
 			body: JSON.stringify(params),
 		});
+
+		console.log('Status:', response.status);
+		const text = await response.text();
+        console.log('Raw Response:', text);
+        
 		const results = await response.json();
 		if (!results.success) {
 			return wrapToolResponse(makeError('CREATE_PROFILE_FAILED', 'Failed to create candidate profile'));
@@ -62,11 +70,9 @@ export const createJobTool: ToolDefinition = {
 	inputSchema: CreateJobSchema,
 	outputSchema: ToolResponseSchema,
 	handler: async (params, user, context) => {
-		console.log('Creating job with params:', params);
-		console.log('User:', user);
-		console.log('User ID:', user.id);
 		// const results = await createJob(params);
-		const response = await fetch('http://localhost:5000/api/jobs/', {
+
+		const response = await fetch(`${BACKEND_URL}/jobs`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -95,14 +101,18 @@ export const deleteProfileTool: ToolDefinition = {
 	handler: async (params, user, context) => {
 		// const results = await deleteProfile(params);
 
-		const response = await fetch(`http://localhost:5000/api/profiles/${params.id}`, {
+		const response = await fetch(`${BACKEND_URL}/profiles/${params.id}`, {
 			method: 'DELETE',
 			headers: {
 				'x-user-id': user.id,
 			},
 		});
-
 		const results = await response.json();
+		if (!results.success) {
+			return wrapToolResponse(
+				makeError('DELETE_PROFILE_FAILED', results.error?.message || 'Failed to delete candidate profile'),
+			);
+		}
 		return wrapToolResponse(results);
 	},
 };
@@ -119,13 +129,18 @@ export const deleteJobTool: ToolDefinition = {
 	handler: async (params, user, context) => {
 		// const results = await deleteJob(params);
 
-		const response = await fetch(`http://localhost:5000/api/jobs/${params.id}`, {
+		const response = await fetch(`${BACKEND_URL}/jobs/${params.id}`, {
 			method: 'DELETE',
 			headers: {
 				'x-user-id': user.id,
 			},
 		});
 		const results = await response.json();
+		if (!results.success) {
+			return wrapToolResponse(
+				makeError('DELETE_JOB_FAILED', results.error?.message || 'Failed to delete job posting'),
+			);
+		}
 		return wrapToolResponse(results);
 	},
 };
@@ -141,7 +156,16 @@ export const matchJobsForProfileTool: ToolDefinition = {
 	inputSchema: MatchJobsForProfileSchema,
 	outputSchema: ToolResponseSchema,
 	handler: async (params, user, context) => {
-		const results = await matchJobsForProfile(params);
+		// const results = await matchJobsForProfile(params);
+
+		const response = await fetch(`${BACKEND_URL}/profiles/match-jobs/${params.profileId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': user.id,
+			},
+		});
+		const results = await response.json();
 		return wrapToolResponse(results);
 	},
 };
@@ -157,7 +181,16 @@ export const matchProfilesForJobTool: ToolDefinition = {
 	inputSchema: MatchProfilesForJobSchema,
 	outputSchema: ToolResponseSchema,
 	handler: async (params, user, context) => {
-		const results = await matchProfilesForJob(params);
+		// const results = await matchProfilesForJob(params);
+
+		const response = await fetch(`${BACKEND_URL}/jobs/match-profiles/${params.jobId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': user.id,
+			},
+		});
+		const results = await response.json();
 		return wrapToolResponse(results);
 	},
 };
@@ -173,7 +206,21 @@ export const filterProfilesTool: ToolDefinition = {
 	inputSchema: FilterProfilesSchema,
 	outputSchema: ToolResponseSchema,
 	handler: async (params, user, context) => {
-		const results = await filterProfiles(params);
+		// const results = await filterProfiles(params);
+
+		const query = new URLSearchParams(params as any).toString();
+		const response = await fetch(`${BACKEND_URL}/profiles/filter?${query}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': user.id,
+			},
+		});
+		const results = await response.json();
+
+		if (!results.success) {
+			return wrapToolResponse(makeError('FILTER_PROFILE_FAILED', results.error?.message || 'Filtering failed'));
+		}
 		return wrapToolResponse(results);
 	},
 };
@@ -189,7 +236,21 @@ export const filterJobsTool: ToolDefinition = {
 	inputSchema: FilterJobsSchema,
 	outputSchema: ToolResponseSchema,
 	handler: async (params, user, context) => {
-		const results = await filterJobs(params);
+		// const results = await filterJobs(params);
+
+		const query = new URLSearchParams(params as any).toString();
+		const response = await fetch(`${BACKEND_URL}/jobs/filter?${query}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': user.id,
+			},
+		});
+		const results = await response.json();
+
+		if (!results.success) {
+			return wrapToolResponse(makeError('FILTER_JOBS_FAILED', results.error?.message || 'Filtering failed'));
+		}
 		return wrapToolResponse(results);
 	},
 };

@@ -58,11 +58,13 @@ export type CreateJobInput = z.infer<typeof CreateJobSchema>;
 
 /* ---------- Delete Profile & Job Schemas ---------- */
 export const DeleteProfileSchema = z.object({
-    id: z.number().min(1, "Profile ID is Required").describe("ID of the profile to delete")
+    // id: z.number().min(1, "Profile ID is Required").describe("ID of the profile to delete")
+    id: z.string().min(1, "Profile ID is Required").describe("ID of the profile to delete") 
 }).describe("Schema for deleting a user profile");
 
 export const DeleteJobSchema = z.object({
-    id: z.number().min(1, "Job ID is Required").describe("ID of the job to delete")
+    // id: z.number().min(1, "Job ID is Required").describe("ID of the job to delete")
+    id: z.string().min(1, "Job ID is Required").describe("ID of the job to delete")
 }).describe("Schema for deleting a job posting");
 
 // Infer TypeScript type from schema
@@ -71,11 +73,11 @@ export type DeleteJobInput = z.infer<typeof DeleteJobSchema>;
 
 /* ---------- Match Schemas ---------- */
 export const MatchJobsForProfileSchema = z.object({
-    profileId: z.number().min(1, "Profile ID is required").describe("Unique identifier for the candidate profile to match jobs against (e.g., 1)")
+    profileId: z.string().min(1, "Profile ID is required").describe("Unique identifier for the candidate profile to match jobs against (e.g., 1)")
 }).describe("Schema for matching jobs to a candidate profile. Returns matching job opportunities.");
 
 export const MatchProfilesForJobSchema = z.object({
-    jobId: z.number().min(1, "Job ID is required").describe("Unique identifier for the job posting to match candidates against (e.g., 1)")
+    jobId: z.string().min(1, "Job ID is required").describe("Unique identifier for the job posting to match candidates against (e.g., 1)")
 }).describe("Schema for matching candidate profiles to a job posting. Returns matching candidates.");
 
 // Infer TypeScript type from schema
